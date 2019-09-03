@@ -30,6 +30,7 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
+import org.apache.velocity.app.Velocity;
 import org.apache.velocity.app.VelocityEngine;
 
 import lebah.util.*;
@@ -109,15 +110,16 @@ public abstract class VTemplate extends javax.servlet.http.HttpServlet {
 	public StringBuffer getBuffer() throws Exception {
 		StringBuffer sb = new StringBuffer("");
 		try {
+			
+			//String resourceLoaderPath = (String) engine.getProperty(Velocity.FILE_RESOURCE_LOADER_PATH);
 			Template template = doTemplate();
+			
 			templateName = template.getName();
 			StringWriter writer = new StringWriter();
 			template.merge(context, writer);
 			writer.close();
 			sb = writer.getBuffer();
 		} catch ( Exception ex ) {
-			//System.out.println("Error = " + ex.getMessage());
-		    ex.printStackTrace();
 			throw ex;			
 		}
 		return sb;
@@ -136,7 +138,6 @@ public abstract class VTemplate extends javax.servlet.http.HttpServlet {
 			writer.close();
 			sb = writer.getBuffer();
 		} catch ( Exception ex ) {
-			//System.out.println("Error = " + ex.getMessage());
 		    ex.printStackTrace();
 			throw ex;			
 		}

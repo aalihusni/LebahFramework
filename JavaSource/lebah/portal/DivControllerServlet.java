@@ -36,7 +36,26 @@ public class DivControllerServlet  extends VServlet  {
 		PrintWriter out = res.getWriter();
 		HttpSession session = req.getSession();
 		
-		synchronized(this) {
+		/*
+		boolean localAccess = false;
+	    if ( "127.0.0.1".equals(req.getRemoteAddr()) ) localAccess = true;
+	    if ( localAccess ) {
+	    	doService(req, res, out, session);
+	    }
+        */
+		doService(req, res, out, session);
+		
+		
+ 		// CLEANUP VELOCITY CONTEXT: END
+ 		
+ 		//CleanUpVelocityContext.run(context, "DivControllerServlet");
+		
+	}
+
+	private void doService(HttpServletRequest req, HttpServletResponse res, PrintWriter out, HttpSession session)
+			throws ServletException {
+		
+		//synchronized(this) {
 			context = (org.apache.velocity.VelocityContext) session.getAttribute("VELOCITY_CONTEXT");
 			engine = (org.apache.velocity.app.VelocityEngine) session.getAttribute("VELOCITY_ENGINE");
 			if ( context == null ) {
@@ -44,13 +63,8 @@ public class DivControllerServlet  extends VServlet  {
 				session.setAttribute("VELOCITY_CONTEXT", context);
 				session.setAttribute("VELOCITY_ENGINE", engine);
 			}
-		}
-		
-		/*
-		context = (org.apache.velocity.VelocityContext) getServletConfig().getServletContext().getAttribute("VELOCITY_CONTEXT");
-		engine = (org.apache.velocity.app.VelocityEngine) getServletConfig().getServletContext().getAttribute("VELOCITY_ENGINE");
-		*/
-		
+		//}
+
 
         String app_path = getServletContext().getRealPath("/");
         app_path = app_path.replace('\\', '/');		
@@ -68,6 +82,7 @@ public class DivControllerServlet  extends VServlet  {
         if ( allowed ){
         	
     		//LABELS Properties
+        	/*
     		Labels label = null;
     		String language = req.getParameter("lang");
     		if ( language != null && !"".equals(language)) {
@@ -83,7 +98,7 @@ public class DivControllerServlet  extends VServlet  {
     			label = lebah.db.Labels.getInstance(language);
     			context.put("label", label.getTitles());
     		}
-
+    		*/
         	
 	        //pathInfo only contains action
 	        pathInfo = pathInfo.substring(pathInfo.indexOf("/") + 1);
@@ -152,25 +167,6 @@ public class DivControllerServlet  extends VServlet  {
 				}
 			//}
         }
-        
-        
-        // CLEANUP VELOCITY CONTEXT: BEGIN 
-        /*
- 		Object[] objArray = context.getKeys();
- 		if ( objArray != null ) {
- 			System.out.println("Cleanup velocity contexts in DivControllerServlet");
- 			for(int i = 0; i < objArray.length; i++) {
- 				System.out.println(objArray);
- 				context.remove(objArray[i]);
- 			}
- 		} else {
- 			System.out.println("context objects IS NULL");
- 		}
- 		*/
- 		// CLEANUP VELOCITY CONTEXT: END
- 		
- 		CleanUpVelocityContext.run(context, "DivControllerServlet");
-		
 	}
 
 	

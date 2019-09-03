@@ -13,7 +13,7 @@
 
   <ul class="nav">
 	#foreach ($module in $modules)
-		#set ( $link = "${session.getAttribute('_portal_action')}?_portal_module=${module.id}" )
+		#set ( $link = "${session.getAttribute('_portal_action')}?__uid=$!request_uid&_portal_module=${module.id}" )
 		<li class="nav-li nav_background"  style="cursor:pointer" onclick="document.location = '$link'">
 			<a class="nav-menu">
 			<span class="text-menu">

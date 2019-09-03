@@ -36,8 +36,7 @@ public class Title extends lebah.portal.velocity.VTemplate {
 		super(engine, context, req, res);
 	}
 	
-	public Template doTemplate() throws Exception {
-		engine.getProperty("");
+	public Template doTemplate() {
 		Template template = engine.getTemplate("vtl/main/title.vm");
 		return template;		
 	}

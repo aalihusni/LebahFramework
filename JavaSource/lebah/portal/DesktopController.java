@@ -17,12 +17,11 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.apache.velocity.VelocityContext;
+import org.apache.velocity.app.VelocityEngine;
 
-import lebah.db.Db;
 import lebah.db.DbException;
 import lebah.db.Labels;
 import lebah.portal.db.AuthenticateUser;
-import lebah.portal.db.CustomClass;
 import lebah.portal.db.PrepareUser;
 import lebah.portal.db.Role;
 import lebah.portal.db.User;
@@ -30,7 +29,6 @@ import lebah.portal.db.UserData;
 import lebah.portal.db.UserModuleDb;
 import lebah.portal.db.UserPage;
 import lebah.portal.element.Tab;
-import lebah.portal.handler.DeviceHandler;
 import lebah.portal.velocity.VTemplate;
 import lebah.util.Util;
 
@@ -68,26 +66,28 @@ public class DesktopController extends lebah.portal.velocity.VServlet {
 	}
 	
 	public void doBody(HttpServletRequest req, HttpServletResponse res) throws Exception {
-        res.setContentType("text/html");
+
+		res.setContentType("text/html");
         //res.setCharacterEncoding("UTF-8");
 
         PrintWriter out = res.getWriter();
 		HttpSession session = req.getSession();
 		
 		
-		synchronized(this) {
-			context = (org.apache.velocity.VelocityContext) session.getAttribute("VELOCITY_CONTEXT");
-			engine = (org.apache.velocity.app.VelocityEngine) session.getAttribute("VELOCITY_ENGINE");
+		//synchronized(this) {
+			context = (VelocityContext) session.getAttribute("VELOCITY_CONTEXT");
+			engine = (VelocityEngine) session.getAttribute("VELOCITY_ENGINE");
 			
 			if (context == null) {
+				System.out.println("... INITIALIZE VELOCITY");
 				super.initVelocity(getServletConfig());
 				session.setAttribute("VELOCITY_CONTEXT", context);
 				session.setAttribute("VELOCITY_ENGINE", engine);
 			}
 			
-		}
+		//}
+			
 		
-
 		/*
 		context = (org.apache.velocity.VelocityContext) getServletConfig().getServletContext().getAttribute("VELOCITY_CONTEXT");
 		engine = (org.apache.velocity.app.VelocityEngine) getServletConfig().getServletContext().getAttribute("VELOCITY_ENGINE");
@@ -274,14 +274,15 @@ public class DesktopController extends lebah.portal.velocity.VServlet {
 		out.println("<head>");
 		out.println("<title>");
 		//**HTML
-        
+		
 		//TITLE
 		Title cTitle = new Title(engine, context, req, res);
 		try {
 			cTitle.print();
 		} catch ( Exception ex ) {
 			System.out.println("[DesktopController] Error while doing TITLE");
-			throw new Exception("Database error:");
+			ex.printStackTrace();
+			
 		}
 
         //**HTML
@@ -291,26 +292,7 @@ public class DesktopController extends lebah.portal.velocity.VServlet {
 		out.println("<meta charset=\"utf-8\">");
 		out.println("<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">");
 		
-		/*
-		out.println("<link rel=\"stylesheet\" href=\"../bootstrap/bootstrap.min.css\">");
-		out.println("<script src=\"../bootstrap/jquery.min.js\"></script>");
-		out.println("<script src=\"../bootstrap/bootstrap.min.js\"></script>");
-		out.println("<script type=\"text/javascript\" src=\"../scriptaculous/misc.js\" ></script>");
-		out.println("<script type=\"text/javascript\" src=\"../ckeditor/ckeditor.js\"></script>");
-		out.println("<script type=\"text/javascript\" src=\"../dropdown.js\" ></script>");
-        out.println("<script type=\"text/javascript\" src=\"../scriptaculous/prototype.js\" ></script>");
-        out.println("<script type=\"text/javascript\" src=\"../scriptaculous/scriptaculous.js\" ></script>");
-		out.println("<script type=\"text/javascript\" src=\"../scriptaculous/fixed.js\" ></script>");
-		out.println("<script type=\"text/javascript\" src=\"../scriptaculous/unittest.js\" ></script>");
-		out.println("<script type=\"text/javascript\" src=\"../scriptaculous/ajax.js\" ></script>");
-		out.println("<script type=\"text/javascript\" src=\"../CalendarPopup.js\" ></script>");
-		out.println("<script type=\"text/javascript\">document.write(getCalendarStyles());</script>");
-		out.println("<script type=\"text/javascript\">var calndr = new CalendarPopup(\"CalenDarDiv1\");</script>");
-		*/
-		
-		//disable css because this is done in JS_CSS
-		//out.println("<link rel=\"stylesheet\" type=\"text/css\" href=\"../css/" + css + "\" />");
-		
+
 		context.put("user_css", css);
 		
 		
@@ -371,7 +353,6 @@ public class DesktopController extends lebah.portal.velocity.VServlet {
 					session.setAttribute("_portal_login", auth.getUserLogin());
 					session.setAttribute("_portal_islogin", "true");
 					
-					//System.out.println("portal role " + (String) session.getAttribute("_portal_role"));
 
 					//CSS
 					try {
@@ -379,7 +360,6 @@ public class DesktopController extends lebah.portal.velocity.VServlet {
 						session.setAttribute("_portal_css", css);
 					} catch ( DbException cssex ) {
 						System.out.println("[DesktopController] Can't get CSS");
-						//Log.print("Error getting CSS: " + cssex.getMessage());
 					}
 					isLoginSuccess = true;
 					

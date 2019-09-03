@@ -21,7 +21,7 @@
 			#else
 				#set ( $td_class = "tab_background" )
 			#end
-			<li class="$td_class" style="height:45px;padding-top:15px;padding-left:15px;padding-right:15px;cursor:pointer" onclick="document.location='${tab.command}'">
+			<li class="$td_class" style="height:45px;padding-top:15px;padding-left:15px;padding-right:15px;cursor:pointer" onclick="document.location='${tab.command}?__uid=$!request_uid'">
     			#if ( $label.get("${tab.title}") )
     				$label.get("${tab.title}")
     			#else							

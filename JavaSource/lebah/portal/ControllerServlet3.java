@@ -44,7 +44,7 @@ public class ControllerServlet3 extends VServlet {
 		PrintWriter out = res.getWriter();
 		HttpSession session = req.getSession();
 
-		synchronized(this) {
+		//synchronized(this) {
 			context = (org.apache.velocity.VelocityContext) session.getAttribute("VELOCITY_CONTEXT");
 			engine = (org.apache.velocity.app.VelocityEngine) session.getAttribute("VELOCITY_ENGINE");
 			if ( context == null ) {
@@ -52,7 +52,7 @@ public class ControllerServlet3 extends VServlet {
 				session.setAttribute("VELOCITY_CONTEXT", context);
 				session.setAttribute("VELOCITY_ENGINE", engine);
 			}
-		}
+		//}
 		
 		/*
 		context = (org.apache.velocity.VelocityContext) getServletConfig().getServletContext().getAttribute("VELOCITY_CONTEXT");

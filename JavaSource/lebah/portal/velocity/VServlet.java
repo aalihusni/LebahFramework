@@ -23,14 +23,14 @@ package lebah.portal.velocity;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Enumeration;
 import java.util.Properties;
 
 import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
-
-import lebah.portal.handler.DeviceHandler;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
@@ -47,6 +47,7 @@ public abstract class VServlet extends HttpServlet {
 	
     public void init( ServletConfig config ) throws ServletException {
         super.init(config);
+        
     }
     
     /*
@@ -55,15 +56,32 @@ public abstract class VServlet extends HttpServlet {
      */
     public void initVelocity(ServletConfig config) throws ServletException {
         try { 
-        	engine = new VelocityEngine();
+        	engine = VelocityEngineHolder.getInstance(config, getServletContext()).getVelocityEngine();
         	context = new VelocityContext();
-	        Properties p = loadConfiguration(config);
+        	context.put("request_uid", lebah.util.UIDGenerator.getUID());
+        } catch ( Exception e ) {
+        	System.out.println("ERROR IN VELOCITYSERVLET INITVELOCITY");
+	        e.printStackTrace();
+        }
+    }
+    
+    
+    /*
+    public void initVelocity(ServletConfig config) throws ServletException {
+        try { 
+        	engine = new VelocityEngine();
+            Properties p = loadConfiguration(config);
+        	//Properties p = loadConfigurationSimple(config);
 	        engine.setApplicationAttribute("javax.servlet.ServletContext", config.getServletContext());
         	engine.init(p);
+        	
+        	context = new VelocityContext();
         } catch ( Exception e ) {
+        	System.out.println("ERROR IN VELOCITYSERVLET INITVELOCITY");
 	        System.out.println( e.getMessage() );
         }
     }
+    */
 
 	private Properties loadConfiguration(ServletConfig config ) throws IOException, FileNotFoundException {
 		/*
@@ -81,31 +99,29 @@ public abstract class VServlet extends HttpServlet {
             if ( realPath != null ) propsFile = realPath;
             p.load( new FileInputStream(propsFile) );
         }
-		/*
-        *  first, normalize our velocity log file to be in the 
-        *  webapp
-        */
+
 		String log = p.getProperty( Velocity.RUNTIME_LOG);
 		if (log != null ) {
             log = getServletContext().getRealPath( log );
 			if (log != null) 
 				p.setProperty( Velocity.RUNTIME_LOG, log );
         }
-        /*
-         *  now, if there is a file loader resource path, treat it the
-         *  same way.
-         */
+
+		
         String path = p.getProperty( Velocity.FILE_RESOURCE_LOADER_PATH );
         if ( path != null) {
-        	System.out.println("resource loader path = " + path);
+        	System.out.println("RESOURCE LOADER PATH = " + path);
             path = getServletContext().getRealPath(  path );
             if ( path != null) {
                 p.setProperty( Velocity.FILE_RESOURCE_LOADER_PATH, path );
             }
+            
+            System.out.println("RESOURCE LOADER PATH = " + path);
         }
         
+        
         //IN DEPLOYMENT ENVIRONMENT MUST REMOVE THIS COMMENT
-        p.setProperty( Velocity.FILE_RESOURCE_LOADER_CACHE, "true" );
+        //p.setProperty( Velocity.FILE_RESOURCE_LOADER_CACHE, "true" );
         
         
        System.out.println("Resource Loader = " +  p.getProperty(RuntimeConstants.RESOURCE_LOADER));
@@ -113,15 +129,24 @@ public abstract class VServlet extends HttpServlet {
         return p;
     }	
     
-	/*
+	
     private Properties loadConfigurationSimple(ServletConfig config ) throws IOException, FileNotFoundException {
    		String path = config.getServletContext().getRealPath("/");
         Properties p = new Properties();
         p.setProperty( Velocity.FILE_RESOURCE_LOADER_PATH, path );
         p.setProperty( Velocity.FILE_RESOURCE_LOADER_CACHE, "true" );
+        
+        //p.setProperty(Velocity.RESOURCE_LOADER, "webapp");
+       //p.setProperty(Velocity.RES, value)
+        
+        /*
+        #resource.loader=webapp
+        		#webapp.resource.loader.class=org.apache.velocity.tools.view.WebappResourceLoader
+        		#webapp.resource.loader.path=/
+        */
         //p.setProperty( "runtime.log", path + "velocity.log" );  
         return p;	    	
     }
-    */
+    
 
 }
